@@ -1,0 +1,72 @@
+cmake_minimum_required(VERSION 3.24)
+project(MyCalib)
+
+file(GLOB_RECURSE INCLUDES_ALL RELATIVE "${PROJECT_SOURCE_DIR}" "include/*.h")
+file(GLOB_RECURSE SOURCES_ALL RELATIVE "${PROJECT_SOURCE_DIR}" "src/*.[ch]pp")
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
+set(MyCalib_LIBNAME ${PROJECT_NAME_LOWER} CACHE INTERNAL "")
+
+add_library(${MyCalib_LIBNAME} ${INCLUDES_ALL} ${SOURCES_ALL})
+source_group(TREE "${PROJECT_SOURCE_DIR}/include"
+        PREFIX "Header Files"
+        FILES ${INCLUDES_ALL}
+        )
+source_group(TREE "${PROJECT_SOURCE_DIR}/src"
+        PREFIX "Source Files"
+        FILES ${SOURCE_ALL}
+        )
+target_include_directories(${MyCalib_LIBNAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+        )
+set(CMAKE_CXX_STANDARD 17)
+
+
+find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(Ceres REQUIRED)
+find_package(Pangolin REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(GTest REQUIRED)
+
+include_directories(
+        ${EIGEN3_INCLUDE_DIR}
+        ${OpenCV_INCLUDE_DIRS}
+        ${CERES_INCLUDE_DIRS}
+        ${Pangolin_INCLUDE_DIRS}
+        ${spdlog_INCLUDE_DIRS}
+        ${GTEST_INCLUDE_DIRS}
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o
+)
+
+target_link_libraries(${MyCalib_LIBNAME}
+        ${OpenCV_LIBS}
+        ${EIGEN3_LIBS}
+        ${CERES_LIBRARIES}
+        ${Pangolin_LIBS}
+        ${spdlog_LIBS}
+        ${GTEST_BOTH_LIBRARIES}
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+        )
+add_subdirectory(test)
+
+string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
+
+install(TARGETS
+        ${MyCalib_LIBNAME}
+        EXPORT ${PROJECT_NAME_LOWER}-config
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+        )
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
+        FILES_MATCHING PATTERN "*.h*"
+        )
+
+install(EXPORT ${PROJECT_NAME_LOWER}-config DESTINATION cmake)
