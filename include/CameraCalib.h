@@ -9,4 +9,12 @@
 #ifndef MYCALIB_INCLUDE_CAMERACALIB_H_
 #define MYCALIB_INCLUDE_CAMERACALIB_H_
 
+class CameraCalib
+{
+ public:
+
+ private:
+
+};
+
 #endif //MYCALIB_INCLUDE_CAMERACALIB_H_
